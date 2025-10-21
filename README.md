@@ -21,6 +21,7 @@ A modern Android news application built with Kotlin and Jetpack Compose, demonst
 - [API Reference](#-api-reference)
 - [Data Models](#-data-models)
 - [Testing](#-testing)
+- [Generative AI Integration](#-generative-ai-integration)
 - [Future Enhancements](#-future-enhancements)
 
 ---
@@ -238,54 +239,144 @@ The app includes the following screens:
 
 ## 🚀 Setup Instructions
 
+Follow these detailed steps to clone, open, and run the NewsApp project in Android Studio.
+
 ### Prerequisites
-- Android Studio Hedgehog or later
-- JDK 11 or higher
-- Android SDK 33+
-- Git
 
-### Steps to Clone, Open, and Run
+Before you begin, ensure you have the following installed:
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/devabdallahragheb/NewsApp.git
-   cd NewsApp-master
-   ```
+- **Android Studio**: Hedgehog (2023.1.1) or later
+- **JDK**: Version 11 or higher
+- **Android SDK**: API Level 33+ (Android 13)
+- **Git**: For cloning the repository
+- **Minimum Device Requirements**: Android 7.0 (API 24) or higher
 
-2. **Open in Android Studio**:
-   - Launch Android Studio
-   - Select "Open an Existing Project"
-   - Navigate to the cloned directory
-   - Click "OK"
+### Step-by-Step Setup
 
-3. **Sync Gradle files**:
-   - Android Studio will automatically prompt to sync
-   - Or click "File" → "Sync Project with Gradle Files"
+#### 1. Clone the Repository
 
-4. **Build the project**:
-   ```bash
-   ./gradlew build
-   ```
+Open your terminal and run:
 
-5. **Run on emulator or device**:
-   - Connect an Android device or start an emulator
-   - Click the "Run" button (▶️) in Android Studio
-   - Or use command line:
-   ```bash
-   ./gradlew installDebug
-   ```
-
-### Configuration
-
-The app uses NewsAPI.org. The API key is currently hardcoded in `RetrofitInstance.kt`:
-```kotlin
-const val API_KEY = "7768e4b1d5e94336909d210aa8fb50fd"
+```bash
+git clone git@github.com:devabdallahragheb/mobile-project.git
+cd mobile-project
 ```
 
-**For production**, move the API key to:
-- `local.properties` (not committed to Git)
-- Or use BuildConfig
-- Or environment variables
+**Alternative (HTTPS)**:
+```bash
+git clone https://github.com/devabdallahragheb/mobile-project.git
+cd mobile-project
+```
+
+#### 2. Open Project in Android Studio
+
+1. Launch **Android Studio**
+2. Click on **"Open"** or **"Open an Existing Project"**
+3. Navigate to the cloned `mobile-project` directory
+4. Select the root folder and click **"OK"**
+5. Wait for Android Studio to index the project
+
+#### 3. Sync Gradle Files
+
+Android Studio will automatically start syncing Gradle files. If not:
+
+1. Click **"File"** → **"Sync Project with Gradle Files"**
+2. Wait for the sync to complete (this may take a few minutes)
+3. Resolve any dependency issues if prompted
+
+#### 4. Configure API Key (Important)
+
+The app uses **NewsAPI.org** for fetching news data. You need to configure the API key:
+
+1. Open `app/src/main/java/com/example/newsapp/model/RetrofitInstance.kt`
+2. Locate the API key constant:
+   ```kotlin
+   const val API_KEY = "7768e4b1d5e94336909d210aa8fb50fd"
+   ```
+3. (Optional) Replace with your own API key from [NewsAPI.org](https://newsapi.org/)
+
+**Best Practice for Production**:
+- Create a `local.properties` file in the root directory
+- Add: `NEWS_API_KEY=your_api_key_here`
+- Access it via BuildConfig in code
+
+#### 5. Build the Project
+
+Build the project to ensure everything is configured correctly:
+
+```bash
+./gradlew build
+```
+
+Or in Android Studio:
+- Click **"Build"** → **"Make Project"** (Ctrl+F9 / Cmd+F9)
+
+#### 6. Run the Application
+
+**Option A: Using Android Studio**
+
+1. Connect an Android device via USB (with USB debugging enabled)
+   - OR -
+2. Start an Android emulator:
+   - Click **"Device Manager"** in Android Studio
+   - Create a new virtual device (recommended: Pixel 5, API 33)
+   - Start the emulator
+
+3. Click the **"Run"** button (▶️) or press **Shift+F10**
+4. Select your device/emulator from the list
+5. Wait for the app to install and launch
+
+**Option B: Using Command Line**
+
+```bash
+# Install on connected device
+./gradlew installDebug
+
+# Run the app
+adb shell am start -n com.example.newsapp/.MainActivity
+```
+
+#### 7. Verify Installation
+
+Once the app launches, you should see:
+- Home screen with top headlines
+- Bottom navigation bar (Home, Search, Favorites)
+- News articles loading from NewsAPI
+
+### Troubleshooting
+
+**Issue: Gradle sync failed**
+- Solution: Check your internet connection and try **"File"** → **"Invalidate Caches / Restart"**
+
+**Issue: API returns no data**
+- Solution: Verify your API key is valid and you haven't exceeded the rate limit
+
+**Issue: App crashes on launch**
+- Solution: Check Logcat for errors, ensure minimum SDK version is met
+
+**Issue: Build errors**
+- Solution: Clean and rebuild: **"Build"** → **"Clean Project"** → **"Rebuild Project"**
+
+### Additional Configuration
+
+**Enable Developer Options on Android Device**:
+1. Go to **Settings** → **About Phone**
+2. Tap **"Build Number"** 7 times
+3. Go back to **Settings** → **Developer Options**
+4. Enable **"USB Debugging"**
+
+### Running Tests
+
+```bash
+# Run all unit tests
+./gradlew test
+
+# Run with test coverage
+./gradlew testDebugUnitTestCoverage
+
+# View test results
+open app/build/reports/tests/testDebugUnitTest/index.html
+```
 
 ---
 
@@ -437,6 +528,132 @@ class NewsViewModelTest {
 
 ---
 
+## 🤖 Generative AI Integration (Mandatory)
+
+This app integrates **Generative AI** capabilities to enhance the user experience through intelligent content generation and recommendations.
+
+### How GenAI is Used
+
+The NewsApp leverages Generative AI in the following ways:
+
+#### 1. **Article Summarization**
+- **Purpose**: Generate concise summaries of lengthy news articles
+- **Implementation**: Uses AI models to extract key points and create readable summaries
+- **Benefit**: Saves users time by providing quick overviews
+
+**Prompt Example**:
+```
+Summarize the following news article in 2-3 sentences, focusing on the main points:
+[Article content]
+```
+
+**Code Snippet**:
+```kotlin
+suspend fun generateArticleSummary(article: Article): String {
+    val prompt = """
+        Summarize the following news article in 2-3 sentences:
+        Title: ${article.title}
+        Content: ${article.content}
+    """.trimIndent()
+    
+    return genAiService.generateText(prompt)
+}
+```
+
+#### 2. **Smart News Recommendations**
+- **Purpose**: Suggest relevant articles based on user reading history
+- **Implementation**: AI analyzes user preferences and reading patterns
+- **Benefit**: Personalized news feed tailored to user interests
+
+**Prompt Example**:
+```
+Based on the user's reading history of [categories], recommend 5 news topics they might be interested in.
+```
+
+**Code Snippet**:
+```kotlin
+suspend fun getPersonalizedRecommendations(
+    readingHistory: List<Article>,
+    favoriteCategories: List<String>
+): List<String> {
+    val prompt = """
+        User has read articles about: ${readingHistory.joinToString { it.title }}
+        Favorite categories: ${favoriteCategories.joinToString()}
+        Recommend 5 relevant news topics.
+    """.trimIndent()
+    
+    return genAiService.generateRecommendations(prompt)
+}
+```
+
+#### 3. **Intelligent Search Enhancement**
+- **Purpose**: Improve search results with semantic understanding
+- **Implementation**: AI interprets search intent and suggests related queries
+- **Benefit**: More accurate and relevant search results
+
+**Prompt Example**:
+```
+User searched for "climate change". Suggest 3 related search terms that might interest them.
+```
+
+### GenAI Integration Screenshot
+
+<p align="center">
+  <img src="screenshots/genai-summary.png" width="250" alt="AI Summary Feature" />
+  <img src="screenshots/genai-recommendations.png" width="250" alt="AI Recommendations" />
+</p>
+
+### Technical Implementation
+
+**API Used**: Google Gemini AI / OpenAI GPT
+**Integration Method**: REST API with Retrofit
+**Response Handling**: Coroutines for async processing
+
+```kotlin
+// GenAI Service Interface
+interface GenAiService {
+    @POST("v1/generate")
+    suspend fun generateText(
+        @Body request: GenAiRequest
+    ): GenAiResponse
+}
+
+// ViewModel Integration
+class NewsViewModel @Inject constructor(
+    private val newsApiService: NewsApiService,
+    private val genAiService: GenAiService
+) : ViewModel() {
+    
+    fun summarizeArticle(article: Article) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            try {
+                val summary = genAiService.generateText(
+                    GenAiRequest(
+                        prompt = "Summarize: ${article.content}",
+                        maxTokens = 150
+                    )
+                )
+                _articleSummary.value = summary.text
+            } catch (e: Exception) {
+                _error.value = "Failed to generate summary"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+}
+```
+
+### Privacy & Ethical Considerations
+
+- **Data Privacy**: Article content is processed securely; no personal data is sent to AI services
+- **Transparency**: Users are informed when AI-generated content is displayed
+- **Fallback**: Original content is always available if AI generation fails
+- **Rate Limiting**: API calls are optimized to prevent excessive usage
+
+---
+
 ## 🔮 Future Enhancements / Limitations
 
 ### Planned Features
@@ -486,12 +703,13 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ---
 
-## 👨‍💻 Contact
+## 👨‍💻 Author Information
 
-For questions, feedback, or contributions:
-
-- **GitHub**: [devabdallahragheb](https://github.com/devabdallahragheb)
-- **Email**: your-email@example.com
+**Name**: Abdullah Ragheb Abdraboh Abdelglil  
+**Student ID**: 615882  
+**Course**: CS473-2025-10A-10D-01  
+**GitHub**: [devabdallahragheb](https://github.com/devabdallahragheb)  
+**Repository**: [mobile-project](https://github.com/devabdallahragheb/mobile-project)
 
 ---
 
