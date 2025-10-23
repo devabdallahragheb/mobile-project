@@ -27,6 +27,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,18 +39,25 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.newsapp.model.Article
 import com.example.newsapp.ui.theme.back
 import com.example.newsapp.ui.theme.button
+import com.example.newsapp.viewmodel.NewsViewModel
 
 @Composable
-fun NewsDetailScreen(article: Article,onBackClick: () -> Unit){
+fun NewsDetailScreen(
+    article: Article,
+    onBackClick: () -> Unit,
+    viewModel: NewsViewModel = hiltViewModel()
+){
 
     Column (
         modifier = Modifier
             .background(back)
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ){
 
@@ -141,5 +150,18 @@ fun NewsDetailScreen(article: Article,onBackClick: () -> Unit){
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // ========== AI INSIGHTS CARD ==========
+        // This displays AI-powered features:
+        // - Article Summarization
+        // - Sentiment Analysis
+        // - Key Insights Extraction
+        AIInsightsCard(
+            article = article,
+            viewModel = viewModel,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }

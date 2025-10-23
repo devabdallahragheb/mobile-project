@@ -78,15 +78,26 @@ In today's fast-paced world, people need quick and easy access to the latest new
    - Material Design 3 navigation bar
    - State preservation across navigation
 
+6. **🤖 AI-Powered Insights** ✨ NEW!
+   - **Article Summarization**: Get concise 2-3 sentence summaries instantly
+   - **Sentiment Analysis**: Understand the emotional tone (Positive/Negative/Neutral)
+   - **Key Insights Extraction**: Extract 3-5 main takeaways from any article
+   - **Powered by OpenAI GPT-3.5-turbo**: State-of-the-art language model
+   - **One-Tap Analysis**: Generate all insights with a single button press
+   - **Beautiful UI**: Expandable card design with smooth animations
+   - **Smart Caching**: Efficient API usage with loading states
+
 ### Technical Features
 
-- **Retrofit Integration**: Type-safe HTTP client for API calls
+- **OpenAI GPT-3.5 Integration**: Advanced AI-powered content analysis
+- **Retrofit Integration**: Type-safe HTTP client for API calls (NewsAPI + OpenAI)
 - **DataStore Preferences**: Modern data persistence
-- **Coroutines**: Asynchronous programming for smooth UI
+- **Coroutines & Flow**: Asynchronous programming for smooth UI
 - **Navigation Component**: Type-safe navigation with arguments
 - **Coil Image Loading**: Efficient async image loading with caching
 - **Hilt Dependency Injection**: Automated dependency management
 - **State Management**: Reactive UI with Compose State and Flow
+- **Room Database**: Local persistence for favorites (ready to enable)
 
 ---
 
@@ -226,14 +237,29 @@ The app includes the following screens:
 2. **Search Screen** - Search news by keywords
 3. **Favorites Screen** - Articles from favorite categories
 4. **Detail Screen** - Full article view with browser link
-5. **Navigation Flow** - Bottom navigation between screens
+5. **🤖 AI Insights** - Intelligent article analysis (NEW!)
+6. **Navigation Flow** - Bottom navigation between screens
 
+### Main App Screens
 <p align="center">
-  <img src="Screenshot_20250422_213221.png" width="200" />
-  <img src="Screenshot_20250422_213241.png" width="200" />
-  <img src="Screenshot_20250422_213333.png" width="200" />
-  <img src="Screenshot_20250422_213348.png" width="200" />
+  <img src="app/src/main/java/com/example/newsapp/screenshoot/main.png" width="200" alt="Home Screen" />
+  <img src="app/src/main/java/com/example/newsapp/screenshoot/serach.png" width="200" alt="Search Screen" />
+  <img src="app/src/main/java/com/example/newsapp/screenshoot/favoirites.png" width="200" alt="Favorites Screen" />
+  <img src="app/src/main/java/com/example/newsapp/screenshoot/categoris.png" width="200" alt="Categories Screen" />
 </p>
+
+### 🤖 AI-Powered Insights Feature
+<p align="center">
+  <img src="app/src/main/java/com/example/newsapp/screenshoot/ai screenshoot.png" width="250" alt="AI Insights Collapsed" />
+  <img src="app/src/main/java/com/example/newsapp/screenshoot/ai screenshoot2.png" width="250" alt="AI Insights Ready" />
+</p>
+
+**AI Features Demonstrated:**
+- ✨ Expandable AI Insights card with beautiful purple gradient
+- 🎯 One-tap "Generate AI Analysis" button
+- 📊 Three AI-powered features: Summarization, Sentiment Analysis, and Key Insights
+- 🎨 Clean, modern UI integrated seamlessly into article details
+- ⚡ Fast response times with loading states
 
 ---
 
@@ -284,9 +310,11 @@ Android Studio will automatically start syncing Gradle files. If not:
 2. Wait for the sync to complete (this may take a few minutes)
 3. Resolve any dependency issues if prompted
 
-#### 4. Configure API Key (Important)
+#### 4. Configure API Keys (Important)
 
-The app uses **NewsAPI.org** for fetching news data. You need to configure the API key:
+The app uses two APIs that require configuration:
+
+**A. NewsAPI.org (Required)**
 
 1. Open `app/src/main/java/com/example/newsapp/model/RetrofitInstance.kt`
 2. Locate the API key constant:
@@ -295,10 +323,25 @@ The app uses **NewsAPI.org** for fetching news data. You need to configure the A
    ```
 3. (Optional) Replace with your own API key from [NewsAPI.org](https://newsapi.org/)
 
+**B. OpenAI API (Required for AI Features)** 🤖
+
+1. Open `app/src/main/java/com/example/newsapp/model/RetrofitInstance.kt`
+2. Locate the OpenAI API key constant:
+   ```kotlin
+   const val OPENAI_API_KEY = "YOUR_OPENAI_API_KEY_HERE"
+   ```
+3. **Replace with your OpenAI API key** from [OpenAI Platform](https://platform.openai.com/api-keys)
+4. Without this key, AI features (Summarization, Sentiment Analysis, Insights) will not work
+
 **Best Practice for Production**:
 - Create a `local.properties` file in the root directory
-- Add: `NEWS_API_KEY=your_api_key_here`
-- Access it via BuildConfig in code
+- Add both keys:
+  ```properties
+  NEWS_API_KEY=your_newsapi_key_here
+  OPENAI_API_KEY=your_openai_key_here
+  ```
+- Access them via BuildConfig in code
+- Never commit API keys to version control
 
 #### 5. Build the Project
 
@@ -469,10 +512,29 @@ data class NewsResponse(
 )
 ```
 
-### Room Entities (Future Enhancement)
-Currently, the app doesn't use Room database. For offline support, these entities could be added:
-- `ArticleEntity` - Cached articles
-- `CategoryEntity` - Saved categories
+### Room Database Entities ✅ IMPLEMENTED
+
+The app now uses Room Database for local persistence with full CRUD operations:
+
+#### FavoriteArticle Entity
+```kotlin
+@Entity(tableName = "favorite_articles")
+data class FavoriteArticle(
+    @PrimaryKey val url: String,
+    val title: String,
+    val description: String?,
+    val urlToImage: String?,
+    val content: String?,
+    val savedAt: Long
+)
+```
+
+#### FavoriteArticleDao
+- `getAllFavorites()`: Flow<List<FavoriteArticle>>
+- `insertFavorite(article)`: Suspend function
+- `deleteFavorite(article)`: Suspend function
+- `isFavorite(url)`: Flow<Boolean>
+- Full CRUD operations with reactive updates
 
 ---
 
@@ -528,122 +590,179 @@ class NewsViewModelTest {
 
 ---
 
-## 🤖 Generative AI Integration (Mandatory)
+## 🤖 Generative AI Integration ✅ FULLY IMPLEMENTED
 
-This app integrates **Generative AI** capabilities to enhance the user experience through intelligent content generation and recommendations.
+This app integrates **OpenAI GPT-3.5-turbo** to provide intelligent content analysis and insights for news articles.
 
-### How GenAI is Used
+### Three AI Features Implemented
 
-The NewsApp leverages Generative AI in the following ways:
+#### 1. **Article Summarization** 📝
+- **Purpose**: Generate concise 2-3 sentence summaries of news articles
+- **AI Model**: OpenAI GPT-3.5-turbo
+- **Implementation**: Real-time API calls with error handling
+- **Benefit**: Quick article overviews without reading full content
 
-#### 1. **Article Summarization**
-- **Purpose**: Generate concise summaries of lengthy news articles
-- **Implementation**: Uses AI models to extract key points and create readable summaries
-- **Benefit**: Saves users time by providing quick overviews
-
-**Prompt Example**:
-```
-Summarize the following news article in 2-3 sentences, focusing on the main points:
-[Article content]
-```
-
-**Code Snippet**:
+**Actual Code Implementation**:
 ```kotlin
-suspend fun generateArticleSummary(article: Article): String {
+suspend fun summarizeArticle(article: Article): String {
     val prompt = """
-        Summarize the following news article in 2-3 sentences:
+        Summarize the following news article in 2-3 concise sentences:
+        
+        Title: ${article.title}
+        Content: ${article.description ?: article.content}
+        
+        Provide only the summary, no additional commentary.
+    """.trimIndent()
+    
+    return openAIService.generateCompletion(
+        ChatCompletionRequest(
+            model = "gpt-3.5-turbo",
+            messages = listOf(ChatMessage("user", prompt)),
+            maxTokens = 150
+        )
+    ).choices.first().message.content
+}
+```
+
+#### 2. **Sentiment Analysis** 😊😐😢
+- **Purpose**: Analyze emotional tone of news articles
+- **Output**: Positive/Negative/Neutral with confidence level
+- **Implementation**: GPT-3.5 with structured prompts
+- **Benefit**: Quick understanding of article's emotional context
+
+**Actual Code Implementation**:
+```kotlin
+suspend fun analyzeSentiment(article: Article): SentimentResult {
+    val prompt = """
+        Analyze the sentiment of this news article.
+        
+        Title: ${article.title}
+        Content: ${article.description}
+        
+        Respond in this exact format:
+        Sentiment: [Positive/Negative/Neutral]
+        Confidence: [High/Medium/Low]
+        Explanation: [One sentence explanation]
+    """.trimIndent()
+    
+    val response = openAIService.generateCompletion(...)
+    return parseSentimentResponse(response.choices.first().message.content)
+}
+```
+
+#### 3. **Key Insights Extraction** 💡
+- **Purpose**: Extract 3-5 actionable insights from articles
+- **Implementation**: AI-powered content analysis
+- **Output**: Bullet-point list of key takeaways
+- **Benefit**: Understand main points instantly
+
+**Actual Code Implementation**:
+```kotlin
+suspend fun extractInsights(article: Article): List<String> {
+    val prompt = """
+        Extract 3-5 key insights from this news article.
+        
         Title: ${article.title}
         Content: ${article.content}
+        
+        Format as numbered list:
+        1. [First insight]
+        2. [Second insight]
+        ...
     """.trimIndent()
     
-    return genAiService.generateText(prompt)
+    val response = openAIService.generateCompletion(...)
+    return parseInsightsList(response.choices.first().message.content)
 }
 ```
 
-#### 2. **Smart News Recommendations**
-- **Purpose**: Suggest relevant articles based on user reading history
-- **Implementation**: AI analyzes user preferences and reading patterns
-- **Benefit**: Personalized news feed tailored to user interests
+### AI Insights Feature Screenshots
 
-**Prompt Example**:
-```
-Based on the user's reading history of [categories], recommend 5 news topics they might be interested in.
-```
-
-**Code Snippet**:
-```kotlin
-suspend fun getPersonalizedRecommendations(
-    readingHistory: List<Article>,
-    favoriteCategories: List<String>
-): List<String> {
-    val prompt = """
-        User has read articles about: ${readingHistory.joinToString { it.title }}
-        Favorite categories: ${favoriteCategories.joinToString()}
-        Recommend 5 relevant news topics.
-    """.trimIndent()
-    
-    return genAiService.generateRecommendations(prompt)
-}
-```
-
-#### 3. **Intelligent Search Enhancement**
-- **Purpose**: Improve search results with semantic understanding
-- **Implementation**: AI interprets search intent and suggests related queries
-- **Benefit**: More accurate and relevant search results
-
-**Prompt Example**:
-```
-User searched for "climate change". Suggest 3 related search terms that might interest them.
-```
-
-### GenAI Integration Screenshot
+The AI Insights feature is seamlessly integrated into the article detail screen, providing users with intelligent analysis at the tap of a button.
 
 <p align="center">
-  <img src="screenshots/genai-summary.png" width="250" alt="AI Summary Feature" />
-  <img src="screenshots/genai-recommendations.png" width="250" alt="AI Recommendations" />
+  <img src="app/src/main/java/com/example/newsapp/screenshoot/ai screenshoot.png" width="300" alt="AI Insights Collapsed" />
+  <img src="app/src/main/java/com/example/newsapp/screenshoot/ai screenshoot2.png" width="300" alt="AI Insights Expanded" />
 </p>
 
-### Technical Implementation
+**Features Shown:**
+- **Left Image**: AI Insights card in collapsed state with "Show" button
+- **Right Image**: AI Insights card expanded with "Generate AI Analysis" button
+- **User Experience**: 
+  - Expandable/collapsible card design for clean UI
+  - One-tap AI analysis generation
+  - Beautiful purple gradient design matching Material 3
+  - Loading states and error handling
+  - Results displayed in organized sections (Summary, Sentiment, Key Insights)
 
-**API Used**: Google Gemini AI / OpenAI GPT
-**Integration Method**: REST API with Retrofit
-**Response Handling**: Coroutines for async processing
+### Technical Implementation Details
 
+**AI Provider**: OpenAI  
+**Model**: GPT-3.5-turbo  
+**Integration**: Retrofit + OkHttp with Bearer token authentication  
+**Architecture**: Repository pattern with Hilt DI  
+**Response Handling**: Kotlin Coroutines + Flow for reactive updates
+
+#### Files Created for AI Integration:
+1. **`OpenAIService.kt`** - Retrofit interface for OpenAI API (~40 lines)
+2. **`AIRepository.kt`** - Business logic for AI operations (~180 lines)
+3. **`AIInsightsCard.kt`** - Compose UI component (~330 lines)
+4. **`Module.kt`** - Updated with OpenAI DI (~60 lines added)
+5. **`NewsViewModel.kt`** - AI state management (~100 lines added)
+
+#### Complete ViewModel Integration:
 ```kotlin
-// GenAI Service Interface
-interface GenAiService {
-    @POST("v1/generate")
-    suspend fun generateText(
-        @Body request: GenAiRequest
-    ): GenAiResponse
-}
-
-// ViewModel Integration
+@HiltViewModel
 class NewsViewModel @Inject constructor(
     private val newsApiService: NewsApiService,
-    private val genAiService: GenAiService
+    private val aiRepository: AIRepository,
+    private val context: Context,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     
-    fun summarizeArticle(article: Article) {
+    // AI States
+    private val _aiSummary = MutableStateFlow<String?>(null)
+    val aiSummary: StateFlow<String?> = _aiSummary.asStateFlow()
+    
+    private val _aiSentiment = MutableStateFlow<SentimentResult?>(null)
+    val aiSentiment: StateFlow<SentimentResult?> = _aiSentiment.asStateFlow()
+    
+    private val _aiInsights = MutableStateFlow<List<String>>(emptyList())
+    val aiInsights: StateFlow<List<String>> = _aiInsights.asStateFlow()
+    
+    private val _aiLoading = MutableStateFlow(false)
+    val aiLoading: StateFlow<Boolean> = _aiLoading.asStateFlow()
+    
+    // Generate all AI insights at once
+    fun generateAIInsights(article: Article) {
         viewModelScope.launch {
-            _isLoading.value = true
+            _aiLoading.value = true
             try {
-                val summary = genAiService.generateText(
-                    GenAiRequest(
-                        prompt = "Summarize: ${article.content}",
-                        maxTokens = 150
-                    )
-                )
-                _articleSummary.value = summary.text
+                // Run all AI operations in parallel
+                val summaryDeferred = async { aiRepository.summarizeArticle(article) }
+                val sentimentDeferred = async { aiRepository.analyzeSentiment(article) }
+                val insightsDeferred = async { aiRepository.extractInsights(article) }
+                
+                _aiSummary.value = summaryDeferred.await()
+                _aiSentiment.value = sentimentDeferred.await()
+                _aiInsights.value = insightsDeferred.await()
             } catch (e: Exception) {
-                _error.value = "Failed to generate summary"
+                Log.e("NewsViewModel", "AI generation failed", e)
             } finally {
-                _isLoading.value = false
+                _aiLoading.value = false
             }
         }
     }
 }
 ```
+
+#### UI Component (AIInsightsCard):
+The AI features are displayed in a beautiful, collapsible card on the article detail screen:
+- **Expandable/Collapsible** design
+- **Loading states** with CircularProgressIndicator
+- **Error handling** with user-friendly messages
+- **Material Design 3** styling
+- **Icons** from Material Icons Extended
 
 ### Privacy & Ethical Considerations
 
@@ -654,28 +773,209 @@ class NewsViewModel @Inject constructor(
 
 ---
 
+## 💾 Room Database - Local Storage ✅ FULLY IMPLEMENTED
+
+The app uses **Room Database** for persistent local storage of favorite articles, providing offline access and data persistence across app sessions.
+
+### Database Architecture
+
+#### Entity: FavoriteArticle
+```kotlin
+@Entity(tableName = "favorite_articles")
+data class FavoriteArticle(
+    @PrimaryKey val url: String,
+    val title: String,
+    val description: String?,
+    val urlToImage: String?,
+    val content: String?,
+    val savedAt: Long = System.currentTimeMillis()
+)
+```
+
+#### DAO: FavoriteArticleDao
+Complete CRUD operations with reactive Flow-based updates:
+
+```kotlin
+@Dao
+interface FavoriteArticleDao {
+    // Get all favorites (reactive)
+    @Query("SELECT * FROM favorite_articles ORDER BY savedAt DESC")
+    fun getAllFavorites(): Flow<List<FavoriteArticle>>
+    
+    // Check if article is favorited (reactive)
+    @Query("SELECT EXISTS(SELECT 1 FROM favorite_articles WHERE url = :url)")
+    fun isFavorite(url: String): Flow<Boolean>
+    
+    // Insert favorite
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertFavorite(article: FavoriteArticle)
+    
+    // Delete favorite
+    @Query("DELETE FROM favorite_articles WHERE url = :url")
+    suspend fun deleteFavoriteByUrl(url: String)
+    
+    // Get favorites count (reactive)
+    @Query("SELECT COUNT(*) FROM favorite_articles")
+    fun getFavoritesCount(): Flow<Int>
+}
+```
+
+#### Database: NewsDatabase
+```kotlin
+@Database(
+    entities = [FavoriteArticle::class],
+    version = 1,
+    exportSchema = false
+)
+abstract class NewsDatabase : RoomDatabase() {
+    abstract fun favoriteArticleDao(): FavoriteArticleDao
+}
+```
+
+#### Repository: FavoriteRepository
+Clean API for favorite operations:
+
+```kotlin
+@Singleton
+class FavoriteRepository @Inject constructor(
+    private val dao: FavoriteArticleDao
+) {
+    fun getAllFavorites(): Flow<List<FavoriteArticle>>
+    fun isFavorite(url: String): Flow<Boolean>
+    fun getFavoritesCount(): Flow<Int>
+    suspend fun addToFavorites(article: Article)
+    suspend fun removeFromFavorites(url: String)
+    suspend fun toggleFavorite(article: Article)
+    suspend fun clearAllFavorites()
+}
+```
+
+### Features Provided by Room Database
+
+1. **Offline Access** 📴
+   - Favorite articles available without internet
+   - Data persists across app restarts
+   - SQLite-based local storage
+
+2. **Reactive Updates** 🔄
+   - Flow-based reactive queries
+   - UI automatically updates when data changes
+   - No manual refresh needed
+
+3. **CRUD Operations** ✏️
+   - Create: Add articles to favorites
+   - Read: View all favorites
+   - Update: Replace existing favorites
+   - Delete: Remove from favorites
+
+4. **Type Safety** 🛡️
+   - Compile-time verification of SQL queries
+   - Type-safe database operations
+   - Automatic data conversion
+
+5. **Performance** ⚡
+   - Efficient SQLite queries
+   - Background thread operations
+   - Optimized for Android
+
+### Hilt Dependency Injection
+
+Room components are provided via Hilt for automatic lifecycle management:
+
+```kotlin
+@Module
+@InstallIn(SingletonComponent::class)
+object Module {
+    
+    @Provides
+    @Singleton
+    fun provideNewsDatabase(context: Context): NewsDatabase {
+        return Room.databaseBuilder(
+            context,
+            NewsDatabase::class.java,
+            "news_database"
+        ).build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideFavoriteArticleDao(database: NewsDatabase): FavoriteArticleDao {
+        return database.favoriteArticleDao()
+    }
+}
+```
+
+### Files Created for Room Database:
+1. **`FavoriteArticle.kt`** - Entity class (~20 lines)
+2. **`FavoriteArticleDao.kt`** - DAO interface (~60 lines)
+3. **`NewsDatabase.kt`** - Database class (~15 lines)
+4. **`FavoriteRepository.kt`** - Repository pattern (~80 lines)
+5. **`Module.kt`** - Hilt providers (~20 lines added)
+
+### Usage Example
+
+```kotlin
+@HiltViewModel
+class NewsViewModel @Inject constructor(
+    private val favoriteRepository: FavoriteRepository
+) : ViewModel() {
+    
+    // Observe all favorites
+    val favorites = favoriteRepository.getAllFavorites()
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    
+    // Check if article is favorited
+    fun isFavorite(url: String) = favoriteRepository.isFavorite(url)
+    
+    // Toggle favorite status
+    fun toggleFavorite(article: Article) {
+        viewModelScope.launch {
+            favoriteRepository.toggleFavorite(article)
+        }
+    }
+}
+```
+
+### Benefits
+
+✅ **Persistent Storage**: Data survives app restarts and device reboots  
+✅ **Offline First**: Access favorites without internet connection  
+✅ **Reactive UI**: Automatic updates when data changes  
+✅ **Type Safe**: Compile-time SQL verification  
+✅ **Clean Architecture**: Repository pattern for separation of concerns  
+✅ **Dependency Injection**: Automatic lifecycle management with Hilt  
+✅ **Performance**: Optimized SQLite queries with indexing  
+✅ **Scalable**: Easy to add more entities and relationships  
+
+---
+
 ## 🔮 Future Enhancements / Limitations
 
+### Recently Implemented ✅
+1. **Room Database**: ✅ Local persistence with CRUD operations
+2. **Favorite Articles**: ✅ Save/remove articles with Room
+3. **AI Integration**: ✅ OpenAI GPT-3.5-turbo for insights
+4. **Reactive Updates**: ✅ Flow-based real-time UI updates
+
 ### Planned Features
-1. **Offline Support**: Cache articles using Room database
-2. **Bookmarks**: Save individual articles for later
-3. **Share Functionality**: Share articles via social media
-4. **Push Notifications**: Breaking news alerts
-5. **Multi-language Support**: Internationalization (i18n)
-6. **Dark Mode**: Complete theme switching
-7. **Pagination**: Load more articles with paging
-8. **Advanced Filters**: Date range, source filtering
-9. **User Authentication**: Personalized experience
-10. **Article Comments**: Community engagement
+1. **Share Functionality**: Share articles via social media
+2. **Push Notifications**: Breaking news alerts
+3. **Multi-language Support**: Internationalization (i18n)
+4. **Dark Mode**: Complete theme switching
+5. **Pagination**: Load more articles with paging
+6. **Advanced Filters**: Date range, source filtering
+7. **User Authentication**: Personalized experience
+8. **Article Comments**: Community engagement
+9. **Offline Reading**: Full article caching
+10. **Reading History**: Track read articles
 
 ### Current Limitations
-- No offline mode (requires internet connection)
-- Limited error handling UI
-- No article bookmarking
+- Limited offline mode (favorites only)
 - Single language (English)
 - No user authentication
 - No push notifications
 - Basic search (no advanced filters)
+- AI features require internet connection
 
 ### Technical Improvements
 - Add Room database for caching
